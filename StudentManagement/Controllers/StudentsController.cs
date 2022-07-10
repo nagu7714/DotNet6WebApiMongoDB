@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using StudentManagement.Helpers;
 using StudentManagement.Models;
 using StudentManagement.Services;
 
@@ -37,7 +38,7 @@ namespace StudentManagement.Controllers
             }
             else
             {
-                return NotFound($"Student with Id = {id} not found");
+                throw new KeyNotFoundException($"Student with Id = {id} not found");
             }
         }
 
@@ -51,7 +52,7 @@ namespace StudentManagement.Controllers
 
                 return CreatedAtAction(nameof(Get), new { student.Id }, student);
             }
-            return BadRequest();
+            throw new AppException($"Invalid Request Body");
         }
 
         // PUT api/<StudentsController>/5
@@ -65,16 +66,17 @@ namespace StudentManagement.Controllers
                 if (studentResult != null)
                 {
                     _studentService.Update(id, student);
+
                      return Ok($"Student with Id = {id} Updated");
                 }
                 else
                 {
-                    return NotFound($"Student with Id = {id} not found");
+                    throw new KeyNotFoundException($"Student with Id = {id} not found");
                 }
             }
             else
             {
-                return BadRequest();
+                throw new AppException($"Invalid Request Body");
             }
                 
         }
@@ -92,7 +94,7 @@ namespace StudentManagement.Controllers
             }
             else
             {
-                return NotFound($"Student with Id = {id} not found");
+                throw new KeyNotFoundException($"Student with Id = {id} not found");
             }
         }
     }
