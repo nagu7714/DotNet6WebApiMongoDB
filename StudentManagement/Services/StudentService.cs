@@ -16,30 +16,30 @@ namespace StudentManagement.Services
             _students = dataBase.GetCollection<Student>(studentStoreDatabaseSettings.StudentCoursesCollectionName);
 
         }
-        public Student Create(Student student)
+        public async Task<Student> CreateAsync(Student student)
         {
-            _students.InsertOne(student);
+            await _students.InsertOneAsync(student);
             return student;
         }
 
-        public void Delete(string id)
+        public async void DeleteAsync(string id)
         {
-            _students.DeleteOne(student => student.Id == id);
+           await _students.DeleteOneAsync(student => student.Id == id);
         }
 
-        public List<Student> Get()
+        public async Task<List<Student>> GetAsync()
         {
-            return _students.Find(student => true).ToList();
+            return await _students.Find(student => true).ToListAsync();
         }
 
-        public Student GetById(string id)
+        public async Task<Student> GetByIdAsync(string id)
         {
-            return _students.Find(student => student.Id == id).FirstOrDefault();
+            return await _students.Find(student => student.Id == id).SingleOrDefaultAsync();
         }
 
-        public void Update(string id, Student student)
+        public async void UpdateAsync(string id, Student student)
         {
-            _students.ReplaceOne(student => student.Id == id, student);
+           await _students.ReplaceOneAsync(student => student.Id == id, student);
         }
     }
 }

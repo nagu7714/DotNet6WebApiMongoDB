@@ -24,16 +24,16 @@ namespace StudentManagement.Controllers
         // GET: api/<StudentsController>
 
         [HttpGet]
-        public ActionResult<List<Student>> Get()
+        public async Task<ActionResult<List<Student>>> Get()
         {
-            return Ok(_studentService.Get());
+            return Ok(await _studentService.GetAsync());
         }
 
         // GET api/<StudentsController>/5
         [HttpGet("{id}")]
-        public ActionResult<Student> Get(string id)
+        public async Task<ActionResult<Student>> Get(string id)
         {
-            var student = _studentService.GetById(id);
+            var student = await _studentService.GetByIdAsync(id);
             if (student != null)
             {                
                 return Ok(student);
@@ -48,14 +48,14 @@ namespace StudentManagement.Controllers
 
         // POST api/<StudentsController>
         [HttpPost]
-        public ActionResult<Student> Post([FromBody]Student student)
+        public async Task<ActionResult<Student>> Post([FromBody]Student student)
         {
 
 
 
             if (Request.HasJsonContentType())
             {
-                _studentService.Create(student);
+               await _studentService.CreateAsync(student);
 
                 return CreatedAtAction(nameof(Get), new { student.Id }, student);
             }
@@ -68,15 +68,15 @@ namespace StudentManagement.Controllers
 
         // PUT api/<StudentsController>/5
         [HttpPut]
-        public ActionResult Put(string id,[FromBody]Student student)
+        public async Task<ActionResult> Put(string id,[FromBody]Student student)
         {
             if (ModelState.IsValid)
             {
-                var studentResult = _studentService.GetById(id);
+                var studentResult =await _studentService.GetByIdAsync(id);
 
                 if (studentResult != null)
                 {
-                    _studentService.Update(id, student);
+                    _studentService.UpdateAsync(id, student);
 
                      return Ok($"Student with Id = {id} Updated");
                 }
@@ -94,13 +94,13 @@ namespace StudentManagement.Controllers
 
         // DELETE api/<StudentsController>/5
         [HttpDelete]
-        public ActionResult Delete(string id)
+        public async Task<ActionResult> Delete(string id)
         {
-            var studentResult = _studentService.GetById(id);
+            var studentResult = await _studentService.GetByIdAsync(id);
 
             if (studentResult != null)
             {
-                _studentService.Delete(id);
+                _studentService.DeleteAsync(id);
                 return Ok($"Student with Id = {id} deleted");
             }
             else

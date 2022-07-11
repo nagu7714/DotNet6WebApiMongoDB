@@ -4,11 +4,11 @@ namespace StudentManagement.Services
 {
     public interface IStudentService
     {
-        List<Student> Get();
-        Student GetById(string id); 
-        Student Create(Student student);
-        void Update(string id,Student student);
-        void Delete(string id);
+        Task<List<Student>> GetAsync();
+        Task<Student> GetByIdAsync(string id); 
+        Task<Student> CreateAsync(Student student);
+        void UpdateAsync(string id,Student student);
+        void DeleteAsync(string id);
         
     }
 }

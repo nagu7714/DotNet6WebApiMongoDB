@@ -24,22 +24,12 @@ try
 
     // Add services to the container.
     // NLog: Setup NLog for Dependency injection
+
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
-    
-    
-
-    
-
-
-
-    
-
-
 
     var app = builder.Build();
-
    
 
     // Configure the HTTP request pipeline.
