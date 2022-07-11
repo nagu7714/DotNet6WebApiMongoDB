@@ -1,43 +1,90 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using NLog;
+using NLog.Extensions.Logging;
+using NLog.Web;
 using StudentManagement.Database;
 using StudentManagement.Middleware;
 using StudentManagement.Services;
 
-var builder = WebApplication.CreateBuilder(args);
+var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+logger.Debug("init main");
 
-// Add services to the container.
-
-builder.Services.Configure<StudentStoreDatabaseSettings>(
-                builder.Configuration.GetSection(nameof(StudentStoreDatabaseSettings)));
-
-builder.Services.AddSingleton<IStudentStoreDatabaseSettings>(sp =>
-    sp.GetRequiredService<IOptions<StudentStoreDatabaseSettings>>().Value);
-
-builder.Services.AddSingleton<IMongoClient>(s =>
-        new MongoClient(builder.Configuration.GetValue<string>("StudentStoreDatabaseSettings:ConnectionString")));
-
-builder.Services.AddScoped<IStudentService, StudentService>();
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    ConfigureServices(builder.Services, builder.Configuration);
+
+    builder.Services.AddControllers();
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+    // Add services to the container.
+    // NLog: Setup NLog for Dependency injection
+    builder.Logging.ClearProviders();
+    builder.Host.UseNLog();
+
+    
+    
+
+    
+
+
+
+    
+
+
+
+    var app = builder.Build();
+
+   
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+    app.UseMiddleware<ErrorHandlerMiddleware>();
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 }
-app.UseMiddleware<ErrorHandlerMiddleware>();
 
-app.UseHttpsRedirection();
+catch (Exception exception)
+{
+    logger.Error(exception, "Stopped program because of exception");
+    throw;
+}
+finally
+{
+    NLog.LogManager.Shutdown();
+}
 
-app.UseAuthorization();
 
-app.MapControllers();
 
-app.Run();
+
+
+
+void ConfigureServices(IServiceCollection services,ConfigurationManager configManager)
+{    
+    services.Configure<StudentStoreDatabaseSettings>(
+                 configManager.GetSection(nameof(StudentStoreDatabaseSettings)));
+
+
+    services.AddSingleton<IStudentStoreDatabaseSettings>(sp =>
+        sp.GetRequiredService<IOptions<StudentStoreDatabaseSettings>>().Value);
+
+    services.AddSingleton<IMongoClient>(s =>
+            new MongoClient(configManager.GetValue<string>("StudentStoreDatabaseSettings:ConnectionString")));
+
+    services.AddScoped<IStudentService, StudentService>();
+}

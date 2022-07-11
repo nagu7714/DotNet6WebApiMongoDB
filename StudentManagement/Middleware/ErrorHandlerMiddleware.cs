@@ -9,9 +9,12 @@ namespace StudentManagement.Middleware
     {
         private readonly RequestDelegate _next;
 
-        public ErrorHandlerMiddleware(RequestDelegate next)
+        private readonly ILogger _logger;
+
+        public ErrorHandlerMiddleware(RequestDelegate next, ILogger<ErrorHandlerMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task Invoke(HttpContext httpContext)
@@ -20,28 +23,28 @@ namespace StudentManagement.Middleware
             {
                 await _next(httpContext);
             }
-            catch(Exception error)
+            catch (Exception error)
             {
-                var response= httpContext.Response;
+                var response = httpContext.Response;
                 response.ContentType = "application/json";
 
                 switch (error)
                 {
-                    case AppException e:
-                        // custom application error
-                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    case AppException:
+                        // custom application error                        
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;                       
                         break;
-                    case KeyNotFoundException e:
+                    case KeyNotFoundException:
                         // not found error
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
                     default:
-                        // unhandled error
-                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        // unhandled error                        
+                        response.StatusCode = (int)HttpStatusCode.InternalServerError;                       
                         break;
 
                 }
-
+                _logger.LogError(error.Message);
                 var result = JsonSerializer.Serialize(new { message = error?.Message });
                 await response.WriteAsync(result);
             }

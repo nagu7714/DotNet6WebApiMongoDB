@@ -13,10 +13,12 @@ namespace StudentManagement.Controllers
     {
 
         private readonly IStudentService _studentService;
+        private readonly ILogger _studentLogger;
 
-        public StudentsController(IStudentService studentService)
+        public StudentsController(IStudentService studentService, ILogger<IStudentService> studentLogger)
         {
             _studentService = studentService;
+            _studentLogger = studentLogger;
         }
 
         // GET: api/<StudentsController>
@@ -32,13 +34,15 @@ namespace StudentManagement.Controllers
         public ActionResult<Student> Get(string id)
         {
             var student = _studentService.GetById(id);
-            if(student != null)
-            {
+            if (student != null)
+            {                
                 return Ok(student);
             }
             else
             {
+               
                 throw new KeyNotFoundException($"Student with Id = {id} not found");
+
             }
         }
 
@@ -46,13 +50,20 @@ namespace StudentManagement.Controllers
         [HttpPost]
         public ActionResult<Student> Post([FromBody]Student student)
         {
-            if (ModelState.IsValid)
+
+
+
+            if (Request.HasJsonContentType())
             {
                 _studentService.Create(student);
 
                 return CreatedAtAction(nameof(Get), new { student.Id }, student);
             }
-            throw new AppException($"Invalid Request Body");
+            else
+            {
+
+                throw new AppException("only application/json supported");
+            }
         }
 
         // PUT api/<StudentsController>/5
@@ -76,7 +87,7 @@ namespace StudentManagement.Controllers
             }
             else
             {
-                throw new AppException($"Invalid Request Body");
+                throw new AppException("Invalid Request Body");
             }
                 
         }
